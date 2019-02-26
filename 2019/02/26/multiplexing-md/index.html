@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>multiplexing | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="select poll epoll 笔记 select,poll,epoll 都是IO多路复用的典型应用，都是同步IO  - IO多路复用  通过一种机制，可以监听多个描述符，一旦某个描述符就绪（写就绪或者读就绪），能够通知程序进行相应的读写操作 可以同时处理处理多个来个客户端的请求，与此相同的解决方案还有多进程和多线程 相比多进程和多线程而言，IO多路复用的优势是系统开销小，系统不需要建立新的进">
+<meta property="og:type" content="article">
+<meta property="og:title" content="multiplexing">
+<meta property="og:url" content="http://yoursite.com/2019/02/26/multiplexing-md/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="select poll epoll 笔记 select,poll,epoll 都是IO多路复用的典型应用，都是同步IO  - IO多路复用  通过一种机制，可以监听多个描述符，一旦某个描述符就绪（写就绪或者读就绪），能够通知程序进行相应的读写操作 可以同时处理处理多个来个客户端的请求，与此相同的解决方案还有多进程和多线程 相比多进程和多线程而言，IO多路复用的优势是系统开销小，系统不需要建立新的进">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://static.oschina.net/uploads/img/201604/21145832_RVDK.png">
+<meta property="og:image" content="https://static.oschina.net/uploads/img/201604/21150044_PgJT.png">
+<meta property="og:updated_time" content="2019-02-26T13:10:54.137Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="multiplexing">
+<meta name="twitter:description" content="select poll epoll 笔记 select,poll,epoll 都是IO多路复用的典型应用，都是同步IO  - IO多路复用  通过一种机制，可以监听多个描述符，一旦某个描述符就绪（写就绪或者读就绪），能够通知程序进行相应的读写操作 可以同时处理处理多个来个客户端的请求，与此相同的解决方案还有多进程和多线程 相比多进程和多线程而言，IO多路复用的优势是系统开销小，系统不需要建立新的进">
+<meta name="twitter:image" content="https://static.oschina.net/uploads/img/201604/21145832_RVDK.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-multiplexing-md" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/02/26/multiplexing-md/" class="article-date">
+  <time datetime="2019-02-26T13:06:43.000Z" itemprop="datePublished">2019-02-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      multiplexing
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="select-poll-epoll-笔记"><a href="#select-poll-epoll-笔记" class="headerlink" title="select poll epoll 笔记"></a>select poll epoll 笔记</h1><blockquote>
+<p>select,poll,epoll 都是IO多路复用的典型应用，都是同步IO</p>
+</blockquote>
+<h2 id="IO多路复用"><a href="#IO多路复用" class="headerlink" title="- IO多路复用"></a>- IO多路复用</h2><blockquote>
+<ol>
+<li>通过一种机制，可以监听多个描述符，一旦某个描述符就绪（写就绪或者读就绪），能够通知程序进行相应的读写操作</li>
+<li>可以同时处理处理多个来个客户端的请求，与此相同的解决方案还有多进程和多线程</li>
+<li>相比多进程和多线程而言，IO多路复用的优势是系统开销小，系统不需要建立新的进程或者线程，也不必维护这些进程和线程</li>
+</ol>
+</blockquote>
+<h2 id="select"><a href="#select" class="headerlink" title="- select"></a>- select</h2><h3 id="1-原理"><a href="#1-原理" class="headerlink" title="1.原理"></a>1.原理</h3><blockquote>
+<p>select 函数监视的文件描述符分3类，分别是writefds、readfds、和exceptfds。调用后select函数会阻塞，直到有描述符就绪（有数据 可读、可写、或者有except），或者超时（timeout指定等待时间，如果立即返回设为null即可），函数返回。当select函数返回后，可以通过遍历fdset，来找到就绪的描述符。</p>
+</blockquote>
+<h3 id="2-优点"><a href="#2-优点" class="headerlink" title="2.优点"></a>2.优点</h3><blockquote>
+<p>良好的跨平台支持</p>
+</blockquote>
+<h3 id="3-缺点"><a href="#3-缺点" class="headerlink" title="3.缺点"></a>3.缺点</h3><blockquote>
+<ol>
+<li>select最大的缺陷就是单个进程所打开的FD是有一定限制的，它由FD_SETSIZE设置，默认值是1024。一般来说这个数目和系统内存关系很大，具体数目可以cat /proc/sys/fs/file-max察看。32位机默认是1024个。64位机默认是2048.</li>
+<li>对socket进行扫描时是线性扫描，即采用轮询的方法，效率较低。当套接字比较多的时候，每次select()都要通过遍历FD_SETSIZE个Socket来完成调度，不管哪个Socket是活跃的，都遍历一遍。这会浪费很多CPU时间。如果能给套接字注册某个回调函数，当他们活跃时，自动完成相关操作，那就避免了轮询，这正是epoll与kqueue做的。</li>
+<li>需要维护一个用来存放大量fd的数据结构，这样会使得用户空间和内核空间在传递该结构时复制开销大。</li>
+</ol>
+</blockquote>
+<h2 id="poll"><a href="#poll" class="headerlink" title="- poll"></a>- poll</h2><h3 id="1-原理-1"><a href="#1-原理-1" class="headerlink" title="1.原理"></a>1.原理</h3><blockquote>
+<p>poll本质上和select没有区别，它将用户传入的数组拷贝到内核空间，然后查询每个fd对应的设备状态，如果设备就绪则在设备等待队列中加入一项并继续遍历，如果遍历完所有fd后没有发现就绪设备，则挂起当前进程，直到设备就绪或者主动超时，被唤醒后它又要再次遍历fd。这个过程经历了多次无谓的遍历。</p>
+</blockquote>
+<h3 id="2-优点-1"><a href="#2-优点-1" class="headerlink" title="2.优点"></a>2.优点</h3><blockquote>
+<p>良好的跨平台支持，没有最大连接数的限制</p>
+</blockquote>
+<h3 id="3-缺点-1"><a href="#3-缺点-1" class="headerlink" title="3.缺点"></a>3.缺点</h3><blockquote>
+<ol>
+<li>大量的fd的数组被整体复制于用户态和内核地址空间之间，当fd很多的时候，效率呈线性下降</li>
+<li>select和poll都需要在返回后，通过遍历文件描述符来获取已经就绪的socket。事实上，同时连接的大量客户端在一时刻可能只有很少的处于就绪状态，因此随着监视的描述符数量的增长，其效率也会线性下降</li>
+</ol>
+</blockquote>
+<h2 id="epoll"><a href="#epoll" class="headerlink" title="- epoll"></a>- epoll</h2><h3 id="1-原理-2"><a href="#1-原理-2" class="headerlink" title="1. 原理"></a>1. 原理</h3><blockquote>
+<p>epoll是在linux2.6内核中提出的，是之前的select和poll的增强版本。相对于select和poll来说，epoll更加灵活，没有描述符限制。epoll使用一个文件描述符管理多个描述符，将用户关系的文件描述符的事件存放到内核的一个事件表中，这样在用户空间和内核空间的copy只需一次。</p>
+</blockquote>
+<blockquote>
+<p>epoll支持水平触发和边缘触发，最大的特点在于边缘触发，它只告诉进程哪些fd刚刚变为就绪态，并且只会通知一次。还有一个特点是，epoll使用“事件”的就绪通知方式，通过epoll_ctl注册fd，一旦该fd就绪，内核就会采用类似callback的回调机制来激活该fd，epoll_wait便可以收到通知。</p>
+</blockquote>
+<h3 id="2-优点-2"><a href="#2-优点-2" class="headerlink" title="2. 优点"></a>2. 优点</h3><blockquote>
+<ol>
+<li>没有最大并发连接的限制，能打开的FD的上限远大于1024（1G的内存上能监听约10万个端口）</li>
+<li>效率提升，不是轮询的方式，不会随着FD数目的增加效率下降。只有活跃可用的FD才会调用callback函数；即Epoll最大的优点就在于它只管你“活跃”的连接，而跟连接总数无关，因此在实际的网络环境中，Epoll的效率就会远远高于select和poll。</li>
+<li>内存拷贝，利用mmap()文件映射内存加速与内核空间的消息传递；即epoll使用mmap减少复制开销。</li>
+</ol>
+</blockquote>
+<h3 id="3-缺点-2"><a href="#3-缺点-2" class="headerlink" title="3.缺点"></a>3.缺点</h3><blockquote>
+<p>. 使用比较复杂</p>
+</blockquote>
+<h3 id="4-两种工作模式"><a href="#4-两种工作模式" class="headerlink" title="4. 两种工作模式"></a>4. 两种工作模式</h3><blockquote>
+<ul>
+<li>LT模式：当epoll_wait 检测到描述符事件发生并将此事件通知应用程序，应用程序可以不立即处理该事件。下次调用epoll_wait时，会再次响应应用程序并通知此事件。</li>
+<li>LT(level triggered)是缺省的工作方式，并且同时支持block和no-block socket。在这种做法中，内核告诉你一个文件描述符是否就绪了，然后你可以对这个就绪的fd进行IO操作。如果你不作任何操作，内核还是会继续通知你的。</li>
+</ul>
+<ul>
+<li>ET模式：当epoll_wait检测到描述符事件发生并将此事件通知应用程序，应用程序必须立即处理该事件。如果不处理，下次调用epoll_wait时，不会再次响应应用程序并通知此事件。</li>
+<li>ET(edge-triggered)是高速工作方式，只支持no-block socket。在这种模式下，当描述符从未就绪变为就绪时，内核通过epoll告诉你。然后它会假设你知道文件描述符已经就绪，并且不会再为那个文件描述符发送更多的就绪通知，直到你做了某些操作导致那个文件描述符不再为就绪状态了(比如，你在发送，接收或者接收请求，或者发送接收的数据少于一定量时导致了一个EWOULDBLOCK 错误）。但是请注意，如果一直不对这个fd作IO操作(从而导致它再次变成未就绪)，内核不会发送更多的通知(only once)。</li>
+<li>ET模式在很大程度上减少了epoll事件被重复触发的次数，因此效率要比LT模式高。epoll工作在ET模式的时候，必须使用非阻塞套接口，以避免由于一个文件句柄的阻塞读/阻塞写操作把处理多个文件描述符的任务饿死。</li>
+</ul>
+</blockquote>
+<h4 id="注意：如果没有大量的idle-connection或者dead-connection，epoll的效率并不会比select-poll高很多，但是当遇到大量的idle-connection，就会发现epoll的效率大大高于select-poll。"><a href="#注意：如果没有大量的idle-connection或者dead-connection，epoll的效率并不会比select-poll高很多，但是当遇到大量的idle-connection，就会发现epoll的效率大大高于select-poll。" class="headerlink" title="注意：如果没有大量的idle-connection或者dead-connection，epoll的效率并不会比select/poll高很多，但是当遇到大量的idle-connection，就会发现epoll的效率大大高于select/poll。"></a>注意：如果没有大量的idle-connection或者dead-connection，epoll的效率并不会比select/poll高很多，但是当遇到大量的idle-connection，就会发现epoll的效率大大高于select/poll。</h4><h2 id="区别"><a href="#区别" class="headerlink" title="- 区别"></a>- 区别</h2><h4 id="1-支持一个进程所能打开的最大连接数"><a href="#1-支持一个进程所能打开的最大连接数" class="headerlink" title="1. 支持一个进程所能打开的最大连接数"></a>1. 支持一个进程所能打开的最大连接数</h4><p><img src="https://static.oschina.net/uploads/img/201604/21145832_RVDK.png" alt="test"></p>
+<h4 id="2-FD剧增后带来的IO效率问题"><a href="#2-FD剧增后带来的IO效率问题" class="headerlink" title="2. FD剧增后带来的IO效率问题"></a>2. FD剧增后带来的IO效率问题</h4><p>在FD较少时select,poll,epoll都差不多，当FD剧增之后，epoll明显效率更高</p>
+<h4 id="3-消息传递方式"><a href="#3-消息传递方式" class="headerlink" title="3. 消息传递方式"></a>3. 消息传递方式</h4><p><img src="https://static.oschina.net/uploads/img/201604/21150044_PgJT.png" alt></p>
+<h2 id="选择"><a href="#选择" class="headerlink" title="- 选择"></a>- 选择</h2><blockquote>
+<ol>
+<li>select，poll实现需要自己不断轮询所有fd集合，直到设备就绪，期间可能要睡眠和唤醒多次交替。而epoll其实也需要调用epoll_wait不断轮询就绪链表，期间也可能多次睡眠和唤醒交替，但是它是设备就绪时，调用回调函数，把就绪fd放入就绪链表中，并唤醒在epoll_wait中进入睡眠的进程。虽然都要睡眠和交替，但是select和poll在“醒着”的时候要遍历整个fd集合，而epoll在“醒着”的时候只要判断一下就绪链表是否为空就行了，这节省了大量的CPU时间。这就是回调机制带来的性能提升。</li>
+<li>select，poll每次调用都要把fd集合从用户态往内核态拷贝一次，并且要把current往设备等待队列中挂一次，而epoll只要一次拷贝，而且把current往等待队列上挂也只挂一次（在epoll_wait的开始，注意这里的等待队列并不是设备等待队列，只是一个epoll内部定义的等待队列）。这也能节省不少的开销</li>
+<li>表面上看epoll的性能最好，但是在连接数少并且连接都十分活跃的情况下，select和poll的性能可能比epoll好，毕竟epoll的通知机制需要很多函数回调。</li>
+<li>select低效是因为每次它都需要轮询。但低效也是相对的，视情况而定，也可通过良好的设计改善。</li>
+</ol>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/02/26/multiplexing-md/" data-id="cjslsjzcf000250vw7s0dkwac" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/02/26/LRU-Cache/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          LRU-Cache
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/02/26/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Hello World</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/02/26/LRU-Cache/">LRU-Cache</a>
+          </li>
+        
+          <li>
+            <a href="/2019/02/26/multiplexing-md/">multiplexing</a>
+          </li>
+        
+          <li>
+            <a href="/2019/02/26/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>
